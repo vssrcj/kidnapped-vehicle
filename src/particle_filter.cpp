@@ -142,9 +142,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
 
-	double stdLandmarkRange   = std_landmark[0];
-  	double stdLandmarkBearing = std_landmark[1];
-
   	for (int i = 0; i < num_particles; i++) {
 
 		double x = particles[i].x;
@@ -171,46 +168,49 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		// Transform observation coordinates.
 		vector<LandmarkObs> mapped_observations;
 		for(unsigned int j = 0; j < observations.size(); j++) {
+
 			double observation_x = cos(theta)*observations[j].x - sin(theta)*observations[j].y + x;
 			double observation_y = sin(theta)*observations[j].x + cos(theta)*observations[j].y + y;
 			mapped_observations.push_back(LandmarkObs{ observations[j].id, observation_x, observation_y });
 		}
 
-		// Observation association to landmark.
+		// Associate the landmarks to the observations for the current particle.
 		dataAssociation(in_range_landmarks, mapped_observations);
 
-		// Reseting weight.
+		// Reset weight.
 		particles[i].weight = 1.0;
+
 		// Calculate weights.
 		for(unsigned int j = 0; j < mapped_observations.size(); j++) {
-			double observationX = mapped_observations[j].x;
-			double observationY = mapped_observations[j].y;
 
-			int landmarkId = mapped_observations[j].id;
+			int landmark_id      = mapped_observations[j].id;
+			double observation_x = mapped_observations[j].x;
+			double observation_y = mapped_observations[j].y;
 
-			double landmarkX, landmarkY;
-			unsigned int k = 0;
-			unsigned int nLandmarks = in_range_landmarks.size();
-			bool found = false;
-			while(!found && k < nLandmarks) {
-				if ( in_range_landmarks[k].id == landmarkId) {
-					found = true;
-					landmarkX = in_range_landmarks[k].x;
-					landmarkY = in_range_landmarks[k].y;
+			double landmark_x, landmark_y;
+
+			// Get the x,y coordinates of the prediction associated with the current observation.
+			for (unsigned int k = 0; k < in_range_landmarks.size(); k++) {
+				if (in_range_landmarks[k].id == landmark_id) {
+					landmark_x = in_range_landmarks[k].x;
+					landmark_y = in_range_landmarks[k].y;
+					break;
 				}
-				k++;
 			}
+	
+			// Calculating weight using multivariate normal distribution.
+			double x_distance = observation_x - landmark_x;
+			double y_distance = observation_y - landmark_y;
 
-			// Calculating weight.
-			double dX = observationX - landmarkX;
-			double dY = observationY - landmarkY;
+			double std_landmark_x = std_landmark[0];
+			double std_landmark_y = std_landmark[1];
 
-			double weight = ( 1/(2*M_PI*stdLandmarkRange*stdLandmarkBearing)) * exp( -( dX*dX/(2*stdLandmarkRange*stdLandmarkRange) + (dY*dY/(2*stdLandmarkBearing*stdLandmarkBearing)) ) );
-			if (weight == 0) {
-				particles[i].weight *= EPS;
-			} else {
-				particles[i].weight *= weight;
-			}
+			double weight = (1 / (2 * M_PI * std_landmark_x * std_landmark_y)) *
+							exp(-((x_distance * x_distance) / (2 * std_landmark_x * std_landmark_x) + 
+								 ((y_distance * y_distance) / (2 * std_landmark_y * std_landmark_y))));
+
+			// Product of this observation weight with total observations weight
+			particles[i].weight *= weight;
 		}
 	}
 }
