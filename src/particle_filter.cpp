@@ -46,9 +46,9 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	for (int i = 0; i < num_particles; i++) {
 
 		Particle particle;
-		particle.id 	= i;
-		particle.x 		= dist_x(gen);
-		particle.y 		= dist_y(gen);
+		particle.id 	 = i;
+		particle.x 		 = dist_x(gen);
+		particle.y 		 = dist_y(gen);
 		particle.theta  = dist_theta(gen);
 		particle.weight = 1.0;
 
@@ -66,8 +66,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 	//  http://www.cplusplus.com/reference/random/default_random_engine/
 
 	// Extracting standard deviations.
-	double std_x 	 = std_pos[0];
-	double std_y 	 = std_pos[1];
+	double std_x 	  = std_pos[0];
+	double std_y 	  = std_pos[1];
 	double std_theta = std_pos[2];
 
 	// Creating normal distributions
@@ -85,13 +85,13 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 			particles[i].x += velocity * delta_t * cos(theta);
 			particles[i].y += velocity * delta_t * sin(theta);
 		} else {
-			particles[i].x 	   += velocity / yaw_rate * (sin(theta + yaw_rate * delta_t) - sin(theta));
-			particles[i].y 	   += velocity / yaw_rate * (cos(theta) - cos(theta + yaw_rate * delta_t));
+			particles[i].x 	 += velocity / yaw_rate * (sin(theta + yaw_rate * delta_t) - sin(theta));
+			particles[i].y 	 += velocity / yaw_rate * (cos(theta) - cos(theta + yaw_rate * delta_t));
 			particles[i].theta += yaw_rate * delta_t;
 		}
 
 		// Add noise.
-		particles[i].x 	   += dist_x(gen);
+		particles[i].x 	 += dist_x(gen);
 		particles[i].y     += dist_y(gen);
 		particles[i].theta += dist_theta(gen);
 	}
@@ -207,8 +207,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			double std_landmark_y = std_landmark[1];
 
 			double weight = (1 / (2 * M_PI * std_landmark_x * std_landmark_y)) *
-							exp(-((x_distance * x_distance) / (2 * std_landmark_x * std_landmark_x) + 
-								 ((y_distance * y_distance) / (2 * std_landmark_y * std_landmark_y))));
+							    exp(-((x_distance * x_distance) / (2 * std_landmark_x * std_landmark_x) + 
+								      ((y_distance * y_distance) / (2 * std_landmark_y * std_landmark_y))));
 
 			// Product of this observation weight with total observations weight.
 			particles[i].weight *= weight;
@@ -256,14 +256,14 @@ void ParticleFilter::resample() {
 Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<int>& associations, 
                                      const std::vector<double>& sense_x, const std::vector<double>& sense_y)
 {
-    //particle: the particle to assign each listed association, and association's (x,y) world coordinates mapping to
-    // associations: The landmark id that goes along with each listed association
-    // sense_x: the associations x mapping already converted to world coordinates
-    // sense_y: the associations y mapping already converted to world coordinates
+   //particle: the particle to assign each listed association, and association's (x,y) world coordinates mapping to
+   // associations: The landmark id that goes along with each listed association
+   // sense_x: the associations x mapping already converted to world coordinates
+   // sense_y: the associations y mapping already converted to world coordinates
 
-    particle.associations = associations;
-    particle.sense_x 	  = sense_x;
-    particle.sense_y 	  = sense_y;
+   particle.associations = associations;
+   particle.sense_x 	  = sense_x;
+   particle.sense_y 	  = sense_y;
 
 	return particle;
 }
@@ -272,26 +272,26 @@ string ParticleFilter::getAssociations(Particle best)
 {
 	vector<int> v = best.associations;
 	stringstream ss;
-    copy(v.begin(), v.end(), ostream_iterator<int>(ss, " "));
-    string s = ss.str();
-    s = s.substr(0, s.length()-1);  // get rid of the trailing space
-    return s;
+   copy(v.begin(), v.end(), ostream_iterator<int>(ss, " "));
+   string s = ss.str();
+   s = s.substr(0, s.length()-1);  // get rid of the trailing space
+   return s;
 }
 string ParticleFilter::getSenseX(Particle best)
 {
 	vector<double> v = best.sense_x;
 	stringstream ss;
-    copy(v.begin(), v.end(), ostream_iterator<float>(ss, " "));
-    string s = ss.str();
-    s = s.substr(0, s.length()-1);  // get rid of the trailing space
-    return s;
+   copy(v.begin(), v.end(), ostream_iterator<float>(ss, " "));
+   string s = ss.str();
+   s = s.substr(0, s.length()-1);  // get rid of the trailing space
+   return s;
 }
 string ParticleFilter::getSenseY(Particle best)
 {
 	vector<double> v = best.sense_y;
 	stringstream ss;
-    copy(v.begin(), v.end(), ostream_iterator<float>(ss, " "));
-    string s = ss.str();
-    s = s.substr(0, s.length()-1);  // get rid of the trailing space
-    return s;
+   copy(v.begin(), v.end(), ostream_iterator<float>(ss, " "));
+   string s = ss.str();
+   s = s.substr(0, s.length()-1);  // get rid of the trailing space
+   return s;
 }
